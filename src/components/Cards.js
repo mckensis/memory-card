@@ -1,112 +1,42 @@
 import { useState } from "react";
-import { v4 as uuid } from "uuid";
+import getCards from '../getCards';
 import Card from "./Card";
 
-const Cards = ({ score, bestScore, setScore, setBestScore }) => {
-  
+const Cards = ({ score, difficulty, bestScore, setScore, setBestScore }) => {
   const [shuffled, setShuffled] = useState(false);
-  const [cards, setCards] = useState([
-    {
-      id: uuid(),
-      title: 'The Letter A',
-      display: 'A',
-      chosen: false,
-    },
-    {
-      id: uuid(),
-      title: 'The Letter B',
-      display: 'B',
-      chosen: false,
-    },
-    {
-      id: uuid(),
-      title: 'The Letter C',
-      display: 'C',
-      chosen: false,
-    },
-    {
-      id: uuid(),
-      title: 'The Letter D',
-      display: 'D',
-      chosen: false,
-    },
-    {
-      id: uuid(),
-      title: 'The Letter E',
-      display: 'E',
-      chosen: false,
-    },
-    {
-      id: uuid(),
-      title: 'The Letter F',
-      display: 'F',
-      chosen: false,
-    },
-    {
-      id: uuid(),
-      title: 'The Letter G',
-      display: 'G',
-      chosen: false,
-    },
-    {
-      id: uuid(),
-      title: 'The Letter H',
-      display: 'H',
-      chosen: false,
-    },
-    {
-      id: uuid(),
-      title: 'The Letter I',
-      display: 'I',
-      chosen: false,
-    },
-    {
-      id: uuid(),
-      title: 'The Letter J',
-      display: 'J',
-      chosen: false,
-    },
-    {
-      id: uuid(),
-      title: 'The Letter K',
-      display: 'K',
-      chosen: false,
-    },
-    {
-      id: uuid(),
-      title: 'The Letter L',
-      display: 'L',
-      chosen: false,
-    }
-  ]);
+  const [cards, setCards] = useState(getCards(difficulty));
 
+  const MAX_SCORE = cards.length;
+
+  // Randomise the array indexes
   const shuffleCards = (cards) => {
     let shuffledCards = [...cards].sort(() => Math.random() - 0.5);
     setCards(shuffledCards);
   };
 
   const chooseCard = (card) => {
+    const cardAlreadyChosen = card.chosen;
     const cardsCopy = [...cards];
-    if (!card.chosen) {
-      const newScore = score + 1
-      setScore(newScore);
-      if (newScore > bestScore) setBestScore(newScore);
-      card.chosen = true;
-      cardsCopy.map((copyCard) => copyCard.id === card.id ? copyCard = card : copyCard);
-      setShuffled(false);
-      setCards(cardsCopy);
-      playRound();
-      console.log(cards);
-      return;
-    }
-    if (card.chosen) {
-      setScore(0);
+    let newScore;
+    
+    if (cardAlreadyChosen) {
+      newScore = 0;
+      //Reset all cards
       cardsCopy.map((copyCard) => copyCard.chosen === true ? copyCard.chosen = false : copyCard);
-      setShuffled(false);
-      setCards(cardsCopy);
-      playRound();
-      console.log(cards);
-    }    
+    }
+    if (!cardAlreadyChosen) {
+      newScore = score + 1;
+      // Mark the card as chosen
+      cardsCopy.map((copyCard) => copyCard.id === card.id ? copyCard.chosen = true : copyCard);
+    }
+    if (score === MAX_SCORE) return;
+    
+    setScore(newScore);
+    if (newScore > bestScore) setBestScore(newScore);
+    setCards(cardsCopy);
+
+    setShuffled(false);
+    Cards();
   };
 
   const playRound = () => {
